@@ -4,7 +4,6 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { authAPI } from '../../api/auth';
 import { uploadToCloudinary } from '../../api/cloudinary';
-import { uploadToCloudinary } from '../../api/cloudinary';
 
 export default function ProfileModal({ isOpen, onClose }) {
   const { user, updateUser } = useAuth();
