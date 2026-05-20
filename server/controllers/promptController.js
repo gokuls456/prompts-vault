@@ -77,13 +77,10 @@ exports.createPrompt = async (req, res) => {
     const imageFile = req.files?.['image']?.[0];
     const beforeImageFile = req.files?.['beforeImage']?.[0];
 
-    const imageUrl = imageFile
-      ? `${req.protocol}://${req.get('host')}/uploads/${imageFile.filename}`
-      : bodyImage;
+    const fileUrl = (f) => f.path || `${req.protocol}://${req.get('host')}/uploads/${f.filename}`;
 
-    const beforeImageUrl = beforeImageFile
-      ? `${req.protocol}://${req.get('host')}/uploads/${beforeImageFile.filename}`
-      : bodyBeforeImage || null;
+    const imageUrl = imageFile ? fileUrl(imageFile) : bodyImage;
+    const beforeImageUrl = beforeImageFile ? fileUrl(beforeImageFile) : bodyBeforeImage || null;
 
     if (!imageUrl) {
       return res.status(400).json({ message: 'An image file or image URL is required' });
@@ -121,6 +118,7 @@ exports.updatePrompt = async (req, res) => {
 
     const imageFile = req.files?.['image']?.[0];
     const beforeImageFile = req.files?.['beforeImage']?.[0];
+    const fileUrl = (f) => f.path || `${req.protocol}://${req.get('host')}/uploads/${f.filename}`;
 
     const update = { title, description, type, category };
 
@@ -131,12 +129,12 @@ exports.updatePrompt = async (req, res) => {
       update.variants = JSON.parse(variants).map((v) => v.trim()).filter(Boolean);
     }
     if (imageFile) {
-      update.image = `${req.protocol}://${req.get('host')}/uploads/${imageFile.filename}`;
+      update.image = fileUrl(imageFile);
     } else if (bodyImage) {
       update.image = bodyImage;
     }
     if (beforeImageFile) {
-      update.beforeImage = `${req.protocol}://${req.get('host')}/uploads/${beforeImageFile.filename}`;
+      update.beforeImage = fileUrl(beforeImageFile);
     } else if (bodyBeforeImage !== undefined) {
       update.beforeImage = bodyBeforeImage || null;
     }

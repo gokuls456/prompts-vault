@@ -111,7 +111,7 @@ exports.updateProfile = async (req, res) => {
     }
 
     if (name && name.trim()) user.name = name.trim();
-    if (req.file) user.avatar = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    if (req.file) user.avatar = req.file.path || `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
 
     await user.save();
 
