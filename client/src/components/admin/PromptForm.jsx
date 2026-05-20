@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { uploadToCloudinary } from '../../api/cloudinary';
 
 const CATEGORIES = [
   'Portrait', 'Sci-Fi', 'Fantasy', 'Architecture', 'Nature',
@@ -75,7 +76,7 @@ export default function PromptForm({ prompt, onSave, onCancel, loading }) {
     setPreview(URL.createObjectURL(file));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!form.title.trim() || !form.description.trim()) {
@@ -91,14 +92,8 @@ export default function PromptForm({ prompt, onSave, onCancel, loading }) {
       return;
     }
 
-    const tagsArray = form.tags
-      .split(',')
-      .map((t) => t.trim().toLowerCase())
-      .filter(Boolean);
-    const variantsArray = form.variants
-      .split(',')
-      .map((v) => v.trim())
-      .filter(Boolean);
+    const tagsArray = form.tags.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean);
+    const variantsArray = form.variants.split(',').map((v) => v.trim()).filter(Boolean);
 
     const formData = new FormData();
     formData.append('title', form.title.trim());
@@ -108,20 +103,31 @@ export default function PromptForm({ prompt, onSave, onCancel, loading }) {
     formData.append('tags', JSON.stringify(tagsArray));
     formData.append('variants', JSON.stringify(variantsArray));
 
-    if (imageMode === 'file' && imageFile) {
-      formData.append('image', imageFile);
-    } else if (imageMode === 'url' && form.imageUrl.trim()) {
-      formData.append('image', form.imageUrl.trim());
-    } else if (prompt?.image) {
-      formData.append('image', prompt.image);
-    }
+    try {
+      // Main image
+      if (imageMode === 'file' && imageFile) {
+        const cdnUrl = await uploadToCloudinary(imageFile);
+        formData.append('image', cdnUrl || imageFile); // cdnUrl if production, file if local
+        if (!cdnUrl) formData.set('image', imageFile);
+      } else if (imageMode === 'url' && form.imageUrl.trim()) {
+        formData.append('image', form.imageUrl.trim());
+      } else if (prompt?.image) {
+        formData.append('image', prompt.image);
+      }
 
-    if (beforeImageMode === 'file' && beforeImageFile) {
-      formData.append('beforeImage', beforeImageFile);
-    } else if (beforeImageMode === 'url' && form.beforeImageUrl.trim()) {
-      formData.append('beforeImage', form.beforeImageUrl.trim());
-    } else if (prompt?.beforeImage) {
-      formData.append('beforeImage', prompt.beforeImage);
+      // Before image
+      if (beforeImageMode === 'file' && beforeImageFile) {
+        const cdnUrl = await uploadToCloudinary(beforeImageFile);
+        if (cdnUrl) formData.append('beforeImage', cdnUrl);
+        else formData.append('beforeImage', beforeImageFile);
+      } else if (beforeImageMode === 'url' && form.beforeImageUrl.trim()) {
+        formData.append('beforeImage', form.beforeImageUrl.trim());
+      } else if (prompt?.beforeImage) {
+        formData.append('beforeImage', prompt.beforeImage);
+      }
+    } catch {
+      toast.error('Image upload failed');
+      return;
     }
 
     onSave(formData);

@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { authAPI } from '../../api/auth';
+import { uploadToCloudinary } from '../../api/cloudinary';
+import { uploadToCloudinary } from '../../api/cloudinary';
 
 export default function ProfileModal({ isOpen, onClose }) {
   const { user, updateUser } = useAuth();
@@ -50,7 +52,11 @@ export default function ProfileModal({ isOpen, onClose }) {
     fd.append('email', form.email);
     if (form.currentPassword) fd.append('currentPassword', form.currentPassword);
     if (form.newPassword) fd.append('newPassword', form.newPassword);
-    if (avatarFile) fd.append('avatar', avatarFile);
+    if (avatarFile) {
+      const cdnUrl = await uploadToCloudinary(avatarFile);
+      if (cdnUrl) fd.append('avatarUrl', cdnUrl);
+      else fd.append('avatar', avatarFile);
+    }
 
     setLoading(true);
     try {
