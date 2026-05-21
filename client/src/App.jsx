@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
+import LoadingBar from './components/ui/LoadingBar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -74,6 +75,7 @@ export default function App() {
     <AuthProvider>
       <Router>
         <div className="min-h-screen bg-dark-900 text-white overflow-x-hidden">
+          <LoadingBar />
           <AnimatedRoutes />
           <Toaster
             position="top-right"

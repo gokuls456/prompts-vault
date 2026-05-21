@@ -48,6 +48,11 @@ export default {
           '0%, 100%': { backgroundPosition: '0% 50%' },
           '50%': { backgroundPosition: '100% 50%' },
         },
+        'loading-bar': {
+          '0%': { transform: 'translateX(-100%)' },
+          '50%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
       },
       animation: {
         float: 'float 6s ease-in-out infinite',
@@ -56,6 +61,7 @@ export default {
         'orb-1': 'orb-1 12s ease-in-out infinite',
         'orb-2': 'orb-2 15s ease-in-out infinite',
         'gradient-x': 'gradient-x 4s ease infinite',
+        'loading-bar': 'loading-bar 1.2s ease-in-out infinite',
       },
       backdropBlur: {
         xs: '2px',
